@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+
+{% block title %}Reviews - {{ product_name }} | Product Sentiment Analyzer{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="mb-2">
+                    <i class="fas fa-cube text-primary me-2"></i>{{ product_name }}
+                </h1>
+                <p class="text-muted">
+                    <i class="fas fa-star text-warning me-1"></i>
+                    Average Rating: <strong>{{ stats.average_rating }}/5</strong> 
+                    | <strong>{{ stats.total_reviews }}</strong> Reviews
+                </p>
+            </div>
+            <div>
+                <a href="/search/" class="btn btn-primary">
+                    <i class="fas fa-search me-2"></i>Search Another
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <h3 class="text-success mb-0">{{ stats.positive_count }}</h3>
+                <p class="text-muted small">Positive ({{ stats.positive_percentage }}%)</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <h3 class="text-danger mb-0">{{ stats.negative_count }}</h3>
+                <p class="text-muted small">Negative ({{ stats.negative_percentage }}%)</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <h3 class="text-warning mb-0">{{ stats.neutral_count }}</h3>
+                <p class="text-muted small">Neutral ({{ stats.neutral_percentage }}%)</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <h3 class="mb-0">{{ stats.average_rating }}</h3>
+                <p class="text-muted small">Avg Rating / 5</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Sentiment</label>
+                <select class="form-select" id="sentimentFilter">
+                    <option value="">All Sentiments</option>
+                    <option value="Positive">😊 Positive</option>
+                    <option value="Negative">😞 Negative</option>
+                    <option value="Neutral">😐 Neutral</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Rating</label>
+                <select class="form-select" id="ratingFilter">
+                    <option value="">All Ratings</option>
+                    <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+                    <option value="4">⭐⭐⭐⭐ (4)</option>
+                    <option value="3">⭐⭐⭐ (3)</option>
+                    <option value="2">⭐⭐ (2)</option>
+                    <option value="1">⭐ (1)</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Search</label>
+                <input type="text" class="form-control" id="searchFilter" placeholder="Search reviews...">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reviews List -->
+<div id="reviewsContainer">
+    {% for review in reviews %}
+    <div class="card border-0 shadow-sm mb-3 review-card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-9">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <h6 class="mb-1">
+                                <strong>{{ review.reviewer_name }}</strong>
+                            </h6>
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>{{ review.review_date }}
+                                {% if review.verified_purchase %}
+                                <span class="badge bg-success ms-2">
+                                    <i class="fas fa-check me-1"></i>Verified Purchase
+                                </span>
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    <p class="mb-3">{{ review.review_text }}</p>
+                </div>
+                <div class="col-md-3 text-md-end">
+                    <div class="mb-3">
+                        <span class="badge {% if review.sentiment == 'Positive' %}bg-success{% elif review.sentiment == 'Negative' %}bg-danger{% else %}bg-warning{% endif %} p-2">
+                            {{ review.sentiment }}
+                        </span>
+                    </div>
+                    <div class="mb-3">
+                        <div class="stars">
+                            {% for i in range(review.rating) %}<i class="fas fa-star text-warning"></i>{% endfor %}
+                            {% for i in range(5-review.rating) %}<i class="far fa-star text-warning"></i>{% endfor %}
+                        </div>
+                        <small class="text-muted">{{ review.rating }}/5</small>
+                    </div>
+                    <div>
+                        <small>
+                            <strong>Polarity:</strong> {{ "%.2f"|format(review.polarity) }}<br>
+                            <strong>Subjectivity:</strong> {{ "%.2f"|format(review.subjectivity) }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>No reviews found for this product.
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if total_pages > 1 %}
+<nav class="mt-5">
+    <ul class="pagination justify-content-center">
+        {% if page > 1 %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1">
+                <i class="fas fa-chevron-left me-2"></i>First
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page - 1 }}">Previous</a>
+        </li>
+        {% endif %}
+        
+        {% for p in range(max(1, page-2), min(total_pages+1, page+3)) %}
+        <li class="page-item {% if p == page %}active{% endif %}">
+            <a class="page-link" href="?page={{ p }}">{{ p }}</a>
+        </li>
+        {% endfor %}
+        
+        {% if page < total_pages %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page + 1 }}">Next</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ total_pages }}">
+                Last<i class="fas fa-chevron-right ms-2"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+<!-- Floating Action Buttons -->
+<div class="floating-actions">
+    <button class="btn btn-primary btn-lg rounded-circle" title="Export CSV" onclick="exportCSV('{{ product_name }}')">
+        <i class="fas fa-download"></i>
+    </button>
+    <a href="/dashboard/?product={{ product_name }}" class="btn btn-success btn-lg rounded-circle" title="View Dashboard">
+        <i class="fas fa-chart-bar"></i>
+    </a>
+</div>
+
+<script>
+    function exportCSV(product) {
+        window.location.href = `/api/export/csv?product=${product}`;
+        showToast('CSV export started', 'success');
+    }
+
+    // Filter reviews
+    function filterReviews() {
+        const sentiment = document.getElementById('sentimentFilter').value;
+        const rating = document.getElementById('ratingFilter').value;
+        const search = document.getElementById('searchFilter').value.toLowerCase();
+
+        document.querySelectorAll('.review-card').forEach(card => {
+            let show = true;
+
+            if (sentiment && !card.innerHTML.includes(sentiment)) {
+                show = false;
+            }
+
+            if (rating && !card.innerHTML.includes(rating + '/5')) {
+                show = false;
+            }
+
+            if (search && !card.textContent.toLowerCase().includes(search)) {
+                show = false;
+            }
+
+            card.style.display = show ? 'block' : 'none';
+        });
+    }
+
+    // Add event listeners
+    document.getElementById('sentimentFilter').addEventListener('change', filterReviews);
+    document.getElementById('ratingFilter').addEventListener('change', filterReviews);
+    document.getElementById('searchFilter').addEventListener('input', filterReviews);
+</script>
+
+<style>
+    .floating-actions {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        display: flex;
+        gap: 10px;
+        z-index: 1000;
+    }
+
+    .floating-actions .btn {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .floating-actions .btn:hover {
+        transform: scale(1.1);
+    }
+
+    .review-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .review-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
+    }
+</style>
+{% endblock %}

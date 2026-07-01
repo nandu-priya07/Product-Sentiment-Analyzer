@@ -1,0 +1,350 @@
+{% extends "base.html" %}
+
+{% block title %}Search - Product Sentiment Analyzer{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-search text-primary me-2"></i>Search Products
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Search Form -->
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-4">
+                    <i class="fas fa-filter text-primary me-2"></i>Scraping Options
+                </h5>
+                
+                <form id="scrapingForm" class="needs-validation">
+                    <!-- Product Name -->
+                    <div class="mb-3">
+                        <label for="productName" class="form-label fw-bold">
+                            <i class="fas fa-cube me-2"></i>Product Name
+                        </label>
+                        <input type="text" class="form-control" id="productName" placeholder="e.g., iPhone 15" required>
+                        <small class="text-muted d-block mt-1">
+                            <i class="fas fa-info-circle me-1"></i>Enter the product you want to analyze
+                        </small>
+                    </div>
+
+                    <!-- Platform Selection -->
+                    <div class="mb-3">
+                        <label for="platform" class="form-label fw-bold">
+                            <i class="fas fa-link me-2"></i>Platform
+                        </label>
+                        <select class="form-select" id="platform">
+                            <option value="amazon">
+                                <i class="fab fa-amazon me-1"></i>Amazon
+                            </option>
+                            <option value="flipkart">
+                                <i class="fab fa-flipkart me-1"></i>Flipkart
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Minimum Reviews -->
+                    <div class="mb-3">
+                        <label for="minReviews" class="form-label fw-bold">
+                            <i class="fas fa-sliders-h me-2"></i>Minimum Reviews
+                        </label>
+                        <input type="number" class="form-control" id="minReviews" value="50" min="20" max="200">
+                        <small class="text-muted d-block mt-1">
+                            <i class="fas fa-info-circle me-1"></i>Minimum 20, Maximum 200 reviews
+                        </small>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
+                        <i class="fas fa-play me-2"></i>Start Scraping
+                    </button>
+                </form>
+
+                <!-- Progress -->
+                <div id="progressSection" style="display: none;" class="mt-4">
+                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <span id="progressText">Starting scraper...</span>
+                    <div class="progress mt-3" style="height: 20px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressBar" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <small id="statusMessage" class="text-muted d-block mt-2"></small>
+                </div>
+
+                <!-- Success Message -->
+                <div id="successSection" style="display: none;" class="mt-4">
+                    <div class="alert alert-success mb-3">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <span id="successMessage">Scraping completed successfully!</span>
+                    </div>
+                    <div id="reviewCount" class="mb-3"></div>
+                    <a href="" id="viewDashboardLink" class="btn btn-success w-100">
+                        <i class="fas fa-chart-bar me-2"></i>View Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Existing Products & Recent Searches -->
+    <div class="col-lg-8">
+        <!-- Existing Products -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-4">
+                    <i class="fas fa-history text-warning me-2"></i>Available Products
+                </h5>
+                <div id="productsContainer" class="row g-2">
+                    <p class="text-muted" id="noProducts">No products available yet. Start by scraping a product.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Existing Reviews -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-4">
+                    <i class="fas fa-magnifying-glass text-info me-2"></i>Search Existing Reviews
+                </h5>
+                
+                <div class="mb-3">
+                    <label for="searchProduct" class="form-label fw-bold">Product</label>
+                    <select class="form-select" id="searchProduct">
+                        <option value="">-- Select Product --</option>
+                    </select>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="searchSentiment" class="form-label fw-bold">Sentiment</label>
+                        <select class="form-select" id="searchSentiment">
+                            <option value="">-- All Sentiments --</option>
+                            <option value="Positive">😊 Positive</option>
+                            <option value="Negative">😞 Negative</option>
+                            <option value="Neutral">😐 Neutral</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="searchRating" class="form-label fw-bold">Rating</label>
+                        <select class="form-select" id="searchRating">
+                            <option value="">-- All Ratings --</option>
+                            <option value="5">⭐⭐⭐⭐⭐ (5 Stars)</option>
+                            <option value="4">⭐⭐⭐⭐ (4 Stars)</option>
+                            <option value="3">⭐⭐⭐ (3 Stars)</option>
+                            <option value="2">⭐⭐ (2 Stars)</option>
+                            <option value="1">⭐ (1 Star)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-info w-100 py-2 fw-bold" onclick="searchReviews()">
+                    <i class="fas fa-search me-2"></i>Search Reviews
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Results Modal -->
+<div class="modal fade" id="searchResultsModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-list me-2"></i>Search Results
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="resultsContainer"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Load available products
+    async function loadAvailableProducts() {
+        try {
+            const response = await fetch('/api/products');
+            const data = await response.json();
+            
+            if (data.success && data.data.length > 0) {
+                const container = document.getElementById('productsContainer');
+                const selectElement = document.getElementById('searchProduct');
+                
+                // Clear
+                container.innerHTML = '';
+                selectElement.innerHTML = '<option value="">-- Select Product --</option>';
+                document.getElementById('noProducts').style.display = 'none';
+                
+                // Add products
+                data.data.forEach(product => {
+                    const badge = document.createElement('a');
+                    badge.href = `/search/product/${product}`;
+                    badge.className = 'badge bg-primary p-3 text-decoration-none';
+                    badge.innerHTML = `<i class="fas fa-cube me-2"></i>${product}`;
+                    container.appendChild(badge);
+                    
+                    const option = document.createElement('option');
+                    option.value = product;
+                    option.textContent = product;
+                    selectElement.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.error('Error loading products:', error);
+        }
+    }
+
+    // Handle scraping form submission
+    document.getElementById('scrapingForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const productName = document.getElementById('productName').value.trim();
+        const platform = document.getElementById('platform').value;
+        const minReviews = parseInt(document.getElementById('minReviews').value);
+        
+        if (!productName) {
+            showToast('Please enter a product name', 'danger');
+            return;
+        }
+        
+        // Show progress
+        document.getElementById('progressSection').style.display = 'block';
+        document.getElementById('successSection').style.display = 'none';
+        this.style.display = 'none';
+        
+        try {
+            // Start scraping
+            const response = await fetch('/scraper/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    product_name: productName,
+                    platform: platform,
+                    min_reviews: minReviews
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (!result.success) {
+                showToast('Error: ' + result.message, 'danger');
+                document.getElementById('progressSection').style.display = 'none';
+                document.getElementById('scrapingForm').style.display = 'block';
+                return;
+            }
+            
+            const taskId = result.task_id;
+            
+            // Poll for status
+            const statusInterval = setInterval(async () => {
+                const statusResponse = await fetch(`/scraper/status/${taskId}`);
+                const statusData = await statusResponse.json();
+                
+                const status = statusData.data;
+                document.getElementById('statusMessage').textContent = status.message;
+                
+                if (status.status === 'completed') {
+                    clearInterval(statusInterval);
+                    document.getElementById('progressSection').style.display = 'none';
+                    document.getElementById('successSection').style.display = 'block';
+                    document.getElementById('reviewCount').innerHTML = `
+                        <div class="alert alert-info">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Successfully scraped <strong>${status.reviews_count}</strong> reviews
+                        </div>
+                    `;
+                    document.getElementById('viewDashboardLink').href = `/dashboard/?product=${productName}`;
+                    loadAvailableProducts();
+                    showToast(`Successfully scraped ${status.reviews_count} reviews!`, 'success');
+                } else if (status.status === 'failed') {
+                    clearInterval(statusInterval);
+                    showToast('Scraping failed: ' + status.message, 'danger');
+                    document.getElementById('progressSection').style.display = 'none';
+                    document.getElementById('scrapingForm').style.display = 'block';
+                }
+            }, 2000);
+            
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('An error occurred: ' + error.message, 'danger');
+            document.getElementById('progressSection').style.display = 'none';
+            document.getElementById('scrapingForm').style.display = 'block';
+        }
+    });
+
+    // Search reviews
+    async function searchReviews() {
+        const product = document.getElementById('searchProduct').value;
+        const sentiment = document.getElementById('searchSentiment').value;
+        const rating = document.getElementById('searchRating').value;
+        
+        if (!product) {
+            showToast('Please select a product', 'warning');
+            return;
+        }
+        
+        try {
+            const params = new URLSearchParams({
+                product: product,
+                ...(sentiment && { sentiment: sentiment }),
+                ...(rating && { min_rating: rating, max_rating: rating })
+            });
+            
+            const response = await fetch(`/api/reviews?${params}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                const results = data.data;
+                let html = '';
+                
+                if (results.length === 0) {
+                    html = '<p class="text-muted">No reviews found</p>';
+                } else {
+                    html = '<div class="list-group">';
+                    results.forEach(review => {
+                        const sentimentColor = review.sentiment === 'Positive' ? 'success' : review.sentiment === 'Negative' ? 'danger' : 'warning';
+                        html += `
+                            <div class="list-group-item">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h6 class="mb-2">${review.product_name}</h6>
+                                        <p class="mb-2 text-muted">${review.review_text.substring(0, 100)}...</p>
+                                        <small>
+                                            <strong>By:</strong> ${review.reviewer_name}
+                                            <strong class="ms-3">Date:</strong> ${review.review_date}
+                                        </small>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <span class="badge bg-${sentimentColor} p-2">${review.sentiment}</span>
+                                        <div class="mt-2">⭐ ${review.rating}/5</div>
+                                        <small class="text-muted">Polarity: ${review.polarity.toFixed(2)}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+                
+                document.getElementById('resultsContainer').innerHTML = html;
+                new bootstrap.Modal(document.getElementById('searchResultsModal')).show();
+                showToast(`Found ${results.length} reviews`, 'success');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('Error searching reviews', 'danger');
+        }
+    }
+
+    // Load on page load
+    window.addEventListener('DOMContentLoaded', loadAvailableProducts);
+</script>
+{% endblock %}
