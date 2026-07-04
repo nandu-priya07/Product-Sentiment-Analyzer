@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from pymongo.errors import ConnectionFailure
+from pymongo.errors import ConfigurationError, PyMongoError
 from bson import ObjectId
 from datetime import datetime
 from config import Config
@@ -15,9 +15,12 @@ def get_db():
         try:
             _client = MongoClient(Config.MONGO_URI, serverSelectionTimeoutMS=5000)
             _client.admin.command("ping")
-            _db = _client.get_database()
+            try:
+                _db = _client.get_database()
+            except ConfigurationError:
+                _db = _client[Config.MONGO_DB_NAME]
             print("SUCCESS: Connected to MongoDB")
-        except ConnectionFailure as e:
+        except PyMongoError as e:
             print(f"WARNING: MongoDB not reachable: {e} — running in demo mode")
             _db = None
     return _db

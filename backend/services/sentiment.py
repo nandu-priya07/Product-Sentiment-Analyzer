@@ -11,19 +11,25 @@ import random
 
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from textblob import TextBlob
-import nltk
-
-# Download NLTK data silently
-try:
-    nltk.data.find("corpora/stopwords")
-except LookupError:
-    nltk.download("stopwords", quiet=True)
-
-from nltk.corpus import stopwords
 
 _analyzer = SentimentIntensityAnalyzer()
 
-STOP_WORDS = set(stopwords.words("english")) | {
+STOP_WORDS = {
+    "a", "about", "above", "after", "again", "against", "all", "am", "an",
+    "and", "any", "are", "as", "at", "be", "because", "been", "before",
+    "being", "below", "between", "both", "but", "by", "did", "do", "does",
+    "doing", "don", "down", "during", "each", "few", "for", "from",
+    "further", "had", "has", "have", "having", "he", "her", "here", "hers",
+    "herself", "him", "himself", "his", "how", "i", "if", "in", "into",
+    "is", "it", "its", "itself", "me", "more", "most", "my", "myself",
+    "no", "nor", "not", "now", "of", "off", "on", "once", "only", "or",
+    "other", "our", "ours", "ourselves", "out", "over", "own", "same",
+    "she", "should", "so", "some", "such", "than", "that", "the", "their",
+    "theirs", "them", "themselves", "then", "there", "these", "they",
+    "this", "those", "through", "to", "too", "under", "until", "up",
+    "very", "was", "we", "were", "what", "when", "where", "which", "while",
+    "who", "whom", "why", "with", "you", "your", "yours", "yourself",
+    "yourselves",
     # Generic e-commerce filler words (NOT sentiment words)
     "product", "item", "thing", "buy", "bought", "purchase", "amazon",
     "flipkart", "get", "got", "one", "use", "used", "would", "also",
