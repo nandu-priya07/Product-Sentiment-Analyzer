@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+.env
+.env.*
+!.env.example
+
+.venv/
+venv/
+
+.DS_Store
+Thumbs.db
+
+node_modules/
+dist/
