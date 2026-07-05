@@ -25,5 +25,5 @@ class Config:
     SECRET_KEY = os.getenv("FLASK_SECRET_KEY", "dev-secret-key-change-in-production")
     CORS_ORIGINS = _csv_env("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000")
     USE_MOCK_DATA = _bool_env("USE_MOCK_DATA", True)
-    DEBUG = _bool_env("FLASK_DEBUG", os.getenv("FLASK_ENV", "development") == "development")
+    DEBUG = _bool_env("FLASK_DEBUG", False)
     PORT = int(os.getenv("PORT", "5000"))

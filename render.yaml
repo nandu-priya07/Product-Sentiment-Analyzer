@@ -22,3 +22,5 @@ services:
         value: "false"
       - key: FLASK_ENV
         value: production
+      - key: FLASK_DEBUG
+        value: "false"

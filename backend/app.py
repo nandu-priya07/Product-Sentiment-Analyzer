@@ -26,6 +26,21 @@ def create_app():
     app.register_blueprint(products_bp, url_prefix="/api")
     app.register_blueprint(sentiment_bp, url_prefix="/api")
 
+    # API index for users opening the Render service root URL.
+    @app.route("/", methods=["GET"])
+    def index():
+        return jsonify({
+            "status": "ok",
+            "service": "Product Sentiment Analyzer API",
+            "message": "Backend is running. Use the /api endpoints from your frontend.",
+            "endpoints": {
+                "health": "/api/health",
+                "scrape": "/api/scrape",
+                "products": "/api/products",
+                "sentiment": "/api/sentiment/<product_id>",
+            },
+        }), 200
+
     # Health check
     @app.route("/api/health", methods=["GET"])
     def health():
