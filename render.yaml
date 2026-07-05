@@ -17,7 +17,7 @@ services:
       - key: FLASK_SECRET_KEY
         sync: false
       - key: CORS_ORIGINS
-        value: https://sentiscope.vercel.app
+        value: https://product-sentiment-analyzer-and-revi-iota.vercel.app
       - key: USE_MOCK_DATA
         value: "false"
       - key: FLASK_ENV

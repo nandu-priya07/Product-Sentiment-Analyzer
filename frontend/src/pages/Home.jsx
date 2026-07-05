@@ -18,7 +18,7 @@ function getErrorMessage(err) {
   if (!err) return "An unexpected error occurred.";
   const msg = err.response?.data?.error || err.message || "";
   if (!msg || msg.includes("ERR_CONNECTION_REFUSED") || msg.includes("Network Error") || msg.includes("connect")) {
-    return "Cannot connect to the backend server. Make sure the Flask server is running on port 5000.";
+    return "Cannot connect to the backend API. Check VITE_API_URL in Vercel and CORS_ORIGINS in Render.";
   }
   if (err.response?.status === 400) return `Bad request: ${msg}`;
   if (err.response?.status === 500) return `Server error: ${msg}`;
